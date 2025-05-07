@@ -28,8 +28,19 @@ class MstateenBundle0 extends HstateenBundle0 {
   val P1P13   = RO(56).withReset(0.U) // hedelegh in Priv Spec V1.13
 }
 
-trait HasStateen0Bundle { self: CSRModule[_] =>
+class StateenNonZeroBundle extends CSRBundle {  // for [m|h]stateen[1|2|3]
+  val SE      = RW(63).withReset(0.U) // m: [h|s]statee[1|2|3]          h: sstateen[1|2|3]
+}
+
+class SstateenNonZeroBundle extends CSRBundle {  // for sstateen[1|2|3]
+  val ALL     = RO(63).withReset(0.U) // m: [h|s]statee[1|2|3]          h: sstateen[1|2|3]
+}
+
+trait HasStateenBundle { self: CSRModule[_] =>
   val fromMstateen0 = IO(Input(new MstateenBundle0))
+  val fromMstateen1 = IO(Input(new StateenNonZeroBundle))
+  val fromMstateen2 = IO(Input(new StateenNonZeroBundle))
+  val fromMstateen3 = IO(Input(new StateenNonZeroBundle))
   val fromHstateen0 = IO(Input(new HstateenBundle0))
   val privState     = IO(Input(new PrivState))
 }
