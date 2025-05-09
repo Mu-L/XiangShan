@@ -41,17 +41,25 @@ import freechips.rocketchip.util.AsyncResetSynchronizerShiftReg
 import difftest.common.DifftestWiring
 import difftest.util.Profile
 
-class XSNoCTop()(implicit p: Parameters) extends BaseXSSoc with HasSoCParameter
+class XSNoCTop()(implicit p: Parameters) extends BaseXSSoc
+                                         with HasSoCParameter
+                                         with HasLazyModuleBuilder
 {
   override lazy val desiredName: String = "XSTop"
 
   require(enableCHI)
 
+  protected def buildCoreWithL2(params: Parameters): XSTileWrap = {
+      buildLazyModuleWithName("core_with_l2")(
+        (ps: Parameters) => new XSTileWrap()(ps)
+      )(params)
+  }
+
   // xstile
-  val core_with_l2 = LazyModule(new XSTileWrap()(p.alter((site, here, up) => {
+  val core_with_l2 = buildCoreWithL2(p.alter((site, here, up) => {
     case XSCoreParamsKey => tiles.head
     case PerfCounterOptionsKey => up(PerfCounterOptionsKey).copy(perfDBHartID = tiles.head.HartId)
-  })))
+  }))
 
   // imsic bus top
   val u_imsic_bus_top = LazyModule(new imsic_bus_top)
